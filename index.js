@@ -1,17 +1,11 @@
 import * as poseDetection from '@tensorflow-models/pose-detection';
 import '@tensorflow/tfjs-backend-webgl';
-import '@mediapipe/pose';
 
 let video = document.getElementById('video');
 let canvas = document.getElementById('output');
 let ctx = canvas.getContext('2d');
 let detector, model;
-
-const COLOR_PALETTE = [
-    '#ffffff', '#800000', '#469990', '#e6194b', '#42d4f4', '#fabed4', '#aaffc3',
-    '#9a6324', '#000075', '#f58231', '#4363d8', '#ffd8b1', '#dcbeff', '#808000',
-    '#ffe119', '#911eb4', '#bfef45', '#f032e6', '#3cb44b', '#a9a9a9'
-];
+const scoreThreshold = 0.6;
 
 async function createDetector() {
     model = poseDetection.SupportedModels.BlazePose;
@@ -61,11 +55,7 @@ async function predictPoses() {
 async function renderResult() {
     let poses = null;
 
-    // Detector can be null if initialization failed (for example when loading
-    // from a URL that does not exist).
     if (detector != null) {
-        // Detectors can throw errors, for example when using custom URLs that
-        // contain a model that doesn't provide the expected output.
         try {
             poses = await detector.estimatePoses(video, { 
                 flipHorizontal: false 
@@ -82,14 +72,34 @@ async function renderResult() {
     if (poses && poses.length > 0) {
         for (const pose of poses) {
             if (pose.keypoints != null) {
+                //console.log("Pose: ", pose);
                 drawKeypoints(pose.keypoints);
-                drawSkeleton(pose.keypoints, pose.id);
+                drawSkeleton(pose.keypoints);
             }
         }
     }
 }
 
 function drawKeypoints(keypoints) {
+    const keypointInd = poseDetection.util.getKeypointIndexBySide(model);
+    ctx.fillStyle = 'Green';
+    ctx.strokeStyle = 'White';
+    ctx.lineWidth = 2;
+    
+    let keypoint;
+    const radius = 4;
+    for(let i=0; i<keypoints.length; i++) {
+        keypoint = keypoints[i];
+        if (keypoint.score >= scoreThreshold) {
+          const circle = new Path2D();
+          circle.arc(keypoint.x, keypoint.y, radius, 0, 2 * Math.PI);
+          ctx.fill(circle);
+          ctx.stroke(circle);
+        }    
+    }
+}
+
+/* function drawKeypointsColor(keypoints) {
     const keypointInd = poseDetection.util.getKeypointIndexBySide(model);
     ctx.strokeStyle = 'White';
     ctx.lineWidth = 2;
@@ -108,7 +118,7 @@ function drawKeypoints(keypoints) {
     for (const i of keypointInd.right) {
         drawKeypoint(keypoints[i]);
     }
-}
+} 
 
 function drawKeypoint(keypoint) {
     // If score is null, just show the keypoint.
@@ -122,11 +132,10 @@ function drawKeypoint(keypoint) {
       ctx.fill(circle);
       ctx.stroke(circle);
     }
-}
+} */
 
-function drawSkeleton(keypoints, poseId) {
-    // Each poseId is mapped to a color in the color palette.
-    const color = COLOR_PALETTE[poseId % 20];
+function drawSkeleton(keypoints) {
+    const color = "#fff";
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
@@ -139,8 +148,6 @@ function drawSkeleton(keypoints, poseId) {
             // If score is null, just show the keypoint.
             const score1 = kp1.score != null ? kp1.score : 1;
             const score2 = kp2.score != null ? kp2.score : 1;
-            const scoreThreshold = 0.6;
-
             if (score1 >= scoreThreshold && score2 >= scoreThreshold) {
                 ctx.beginPath();
                 ctx.moveTo(kp1.x, kp1.y);
