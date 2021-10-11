@@ -48,13 +48,8 @@ async function activateVideo() {
 }
 
 async function predictPoses() {
-    await renderResult();
-    window.requestAnimationFrame(predictPoses);
-};
-
-async function renderResult() {
     let poses = null;
-
+    
     if (detector != null) {
         try {
             poses = await detector.estimatePoses(video, { 
@@ -77,6 +72,8 @@ async function renderResult() {
             }
         }
     }
+
+    window.requestAnimationFrame(predictPoses);
 }
 
 function drawKeypoints(keypoints) {
