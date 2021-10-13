@@ -2,7 +2,6 @@
   "name": "blazepose-simple",
   "version": "1.0.0",
   "description": "Blazepose usage",
-  "main": "index.js",
   "author": "Selvam Subbiah",
   "license": "ISC",
   "dependencies": {
@@ -12,19 +11,19 @@
     "@tensorflow/tfjs-converter": "^3.9.0",
     "@tensorflow/tfjs-core": "^3.9.0"
   },
+  "homepage": "index.html",
   "scripts": {
-    "watch": "cross-env NODE_ENV=development parcel index.html --no-hmr --open",
-    "build": "cross-env NODE_ENV=production parcel build index.html --public-url ./"
+    "watch": "cross-env NODE_ENV=development parcel *.html --no-hmr --open",
+    "build": "cross-env NODE_ENV=production parcel build *.html --public-url ./"
   },
   "browser": {
     "crypto": false
   },
   "devDependencies": {
-    "@babel/core": "^7.15.5",
-    "@babel/plugin-transform-runtime": "^7.15.0",
-    "@babel/preset-env": "^7.15.6",
-    "babel-preset-env": "^1.7.0",
-    "cross-env": "^7.0.3",
-    "parcel": "^2.0.0-rc.0"
+    "@babel/core": "^7.0.0-0",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "babel-preset-env": "~1.6.1",
+    "cross-env": "^5.1.6",
+    "parcel-bundler": "~1.12.5"
   }
 }
